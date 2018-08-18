@@ -6,4 +6,4 @@
 
 1.kafka的producer分区发送和consumer分区接收
 
-2.consumer接收数据后处理数据时暂停拉取知道处理数据完毕
+2.consumer接收数据后处理数据时暂停拉取直到处理数据完毕
