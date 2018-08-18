@@ -1,4 +1,4 @@
-package kafka.simple;
+package kafka.partition;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
@@ -19,9 +19,9 @@ import java.util.Scanner;
 /**
  * Created by sunilpatil on 12/28/15.
  */
-public class Consumer {
+public class Consumer1 {
 	
-	private static final Logger logger = LoggerFactory.getLogger(Consumer.class);
+	private static final Logger logger = LoggerFactory.getLogger(Consumer1.class);
 	
     private static Scanner in;
 
@@ -62,36 +62,9 @@ public class Consumer {
             //Figure out where to start processing messages from
             kafkaConsumer = new KafkaConsumer<Integer, String>(configProperties);
             
+            TopicPartition partition1 = new TopicPartition(topicName, 1);
+            kafkaConsumer.assign(Arrays.asList(partition1));
             
-    		ConsumerRebalanceListener listener = new ConsumerRebalanceListener() {
-
-    			@Override
-    			//在rebalance操作之前调用，用于我们提交消费者偏移
-    			public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-    				
-    				logger.info("消费者集群有变化了");
-    				
-    				kafkaConsumer.commitSync();
-    			}
-
-    			@Override
-    			//在rebalance操作之后调用，用于我们拉取新的分配区的偏移量
-    			public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-    				for (TopicPartition tp : partitions) {
-    					OffsetAndMetadata offsetAndMetaData = kafkaConsumer.committed(tp);
-    					long startOffset = offsetAndMetaData != null ? offsetAndMetaData.offset() : -1L;
-
-    					if(startOffset >= 0) {
-    						
-    						logger.info("topic为"+tp.topic()+"的第"+tp.partition()+"个分区有需要seek的偏移量");
-    						
-    						kafkaConsumer.seek(tp, startOffset);
-    					}
-    				}
-    			}
-    		};
-            
-            kafkaConsumer.subscribe(Arrays.asList(topicName),listener);
             //Start processing messages
             try {
                 while (true) {
